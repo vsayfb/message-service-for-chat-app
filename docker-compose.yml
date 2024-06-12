@@ -1,0 +1,38 @@
+services:
+  message-service:
+    container_name: message-service
+    build:
+      context: .
+      target: ${BUILD_TARGET:-dev}
+    volumes:
+      - ~/.m2:/root/.m2
+      - ./:/app
+    networks:
+      - ms
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: password
+    command:  bash -c  "
+      rabbitmq-plugins enable --offline rabbitmq_stomp &&
+      rabbitmq-server
+      "
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      - ms
+
+networks:
+  ms:
+      external: true
