@@ -18,9 +18,6 @@ services:
     image: rabbitmq:management
     ports:
       - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: user
-      RABBITMQ_DEFAULT_PASS: password
     command:  bash -c  "
       rabbitmq-plugins enable --offline rabbitmq_stomp &&
       rabbitmq-server
