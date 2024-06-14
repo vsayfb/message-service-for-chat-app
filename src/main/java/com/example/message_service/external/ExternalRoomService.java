@@ -9,10 +9,14 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class ExternalRoomService {
 
+    private  final RestTemplate restTemplate;
+
+    public ExternalRoomService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
 
     public boolean checkRoomExists(String roomId) {
-
-        RestTemplate restTemplate = new RestTemplate();
 
         try {
             ResponseEntity response = restTemplate.getForObject("http://room-service:8080/api/rooms/" + roomId, ResponseEntity.class);
