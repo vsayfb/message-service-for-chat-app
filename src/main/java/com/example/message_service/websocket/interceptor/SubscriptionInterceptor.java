@@ -29,9 +29,9 @@ public class SubscriptionInterceptor implements ChannelInterceptor {
                 return null;
             }
 
-            String roomId = dest.split("/")[2];
+            String roomId = dest.substring("/topic/".length());
 
-            if (roomId == null || roomId.isEmpty()) {
+            if (roomId.isEmpty()) {
                 return null;
             }
 
