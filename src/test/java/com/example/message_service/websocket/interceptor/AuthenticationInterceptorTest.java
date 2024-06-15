@@ -50,11 +50,11 @@ public class AuthenticationInterceptorTest {
     }
 
     @Test
-    void shouldReturnNullWhenDestNotStartWithTopic() {
+    void shouldReturnNullWhenDestNotStartWithMessages() {
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SEND);
 
-        headerAccessor.setDestination("/gopic");
+        headerAccessor.setDestination("/topic/");
 
         when(message.getHeaders()).thenReturn(headerAccessor.toMessageHeaders());
 
@@ -68,7 +68,7 @@ public class AuthenticationInterceptorTest {
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SEND);
 
-        headerAccessor.setDestination("/topic/12345");
+        headerAccessor.setDestination("/messages/12345");
 
         when(message.getHeaders()).thenReturn(headerAccessor.toMessageHeaders());
 
@@ -82,7 +82,7 @@ public class AuthenticationInterceptorTest {
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SEND);
 
-        headerAccessor.setDestination("/topic/12345");
+        headerAccessor.setDestination("/messages/12345");
         headerAccessor.setNativeHeader("Authorization", "token");
 
         when(message.getHeaders()).thenReturn(headerAccessor.toMessageHeaders());
@@ -99,7 +99,7 @@ public class AuthenticationInterceptorTest {
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SEND);
 
-        headerAccessor.setDestination("/topic/12312412");
+        headerAccessor.setDestination("/messages/12312412");
         headerAccessor.setNativeHeader("Authorization", "Bearer " + token);
 
         when(message.getHeaders()).thenReturn(headerAccessor.toMessageHeaders());
@@ -120,7 +120,7 @@ public class AuthenticationInterceptorTest {
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SEND);
 
-        headerAccessor.setDestination("/topic/12345");
+        headerAccessor.setDestination("/messages/12345");
         headerAccessor.setNativeHeader("Authorization", "Bearer " + token);
 
         when(message.getHeaders()).thenReturn(headerAccessor.toMessageHeaders());
@@ -147,7 +147,7 @@ public class AuthenticationInterceptorTest {
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SEND);
 
-        headerAccessor.setDestination("/topic/" + roomId);
+        headerAccessor.setDestination("/messages/" + roomId);
         headerAccessor.setNativeHeader("Authorization", "Bearer " + token);
 
         JWTClaims jwtClaims = new JWTClaims();
@@ -167,6 +167,8 @@ public class AuthenticationInterceptorTest {
 
         assertNotNull(result);
         assertEquals("hello there", result.getPayload());
+
+        System.out.println("result -> " + result);
 
         verify(jwtSigner, times(1)).validateToken(token);
     }
