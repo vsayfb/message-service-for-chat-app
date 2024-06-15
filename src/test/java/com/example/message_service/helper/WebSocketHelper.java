@@ -1,5 +1,7 @@
 package com.example.message_service.helper;
 
+import lombok.Setter;
+import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandler;
@@ -14,8 +16,11 @@ import java.net.UnknownHostException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+@Setter
 @Component
 public class WebSocketHelper {
+
+    private MessageConverter messageConverter = new StringMessageConverter();
 
     public StompSession connect(String endpoint, int port) throws ExecutionException, InterruptedException, UnknownHostException {
 
@@ -28,7 +33,7 @@ public class WebSocketHelper {
 
         WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
 
-        stompClient.setMessageConverter(new StringMessageConverter());
+        stompClient.setMessageConverter(messageConverter);
 
         String url = String.format("ws://%s:%s/%s", host, port, endpoint);
 
@@ -38,4 +43,5 @@ public class WebSocketHelper {
 
         return asyncSession.get();
     }
+
 }
