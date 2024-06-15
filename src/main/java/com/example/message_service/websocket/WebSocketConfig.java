@@ -1,5 +1,6 @@
 package com.example.message_service.websocket;
 
+import com.example.message_service.websocket.interceptor.AuthenticationInterceptor;
 import com.example.message_service.websocket.interceptor.SubscriptionInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -14,12 +15,14 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final SubscriptionInterceptor subscriptionInterceptor;
+    private  final AuthenticationInterceptor authenticationInterceptor;
 
     @Value("${stomp.broker.host:localhost}")
     private String host;
 
-    public WebSocketConfig(SubscriptionInterceptor authenticationInterceptor) {
+    public WebSocketConfig(SubscriptionInterceptor authenticationInterceptor, AuthenticationInterceptor authenticationInterceptor1) {
         this.subscriptionInterceptor = authenticationInterceptor;
+        this.authenticationInterceptor = authenticationInterceptor1;
     }
 
     @Override
@@ -30,14 +33,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(subscriptionInterceptor);
+        registration.interceptors(subscriptionInterceptor, authenticationInterceptor);
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
 
 
-        registry.setApplicationDestinationPrefixes("messages")
+        registry.setApplicationDestinationPrefixes("/messages")
                 .enableStompBrokerRelay("/topic")
                 .setRelayHost(host)
                 .setRelayPort(61613)
