@@ -13,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 @PactConsumerTest
 public class ExternalRoomServiceContractTest {
 
@@ -25,7 +24,7 @@ public class ExternalRoomServiceContractTest {
         return builder
                 .given("an existing room")
                 .uponReceiving("a request to find the existing room")
-                .path("/api/rooms/123")
+                .path("/rooms/123")
                 .method("GET")
                 .willRespondWith()
                 .status(200)
@@ -50,7 +49,7 @@ public class ExternalRoomServiceContractTest {
 
         return builder.given("a room that does not exist")
                 .uponReceiving("a request to find a non-existent room")
-                .path("/api/rooms/345")
+                .path("/rooms/345")
                 .method("GET")
                 .willRespondWith()
                 .status(404)
@@ -69,6 +68,5 @@ public class ExternalRoomServiceContractTest {
 
         assertFalse(externalRoomService.checkRoomExists("345"));
     }
-
 
 }

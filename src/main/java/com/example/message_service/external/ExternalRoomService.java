@@ -22,7 +22,8 @@ public class ExternalRoomService {
     public boolean checkRoomExists(String roomId) {
 
         try {
-            ResponseEntity<?> response = restTemplate.getForEntity(roomServiceUrl + "/api/rooms/" + roomId, Object.class);
+            ResponseEntity<?> response = restTemplate.getForEntity(roomServiceUrl + "/rooms/" + roomId,
+                    Object.class);
 
             return response.getStatusCode().equals(HttpStatus.OK);
 
