@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 
-@RequestMapping("messages")
+@RequestMapping("/messages")
 @RestController
 public class MessageRestController {
 
@@ -19,15 +19,13 @@ public class MessageRestController {
         this.jwtSigner = jwtSigner;
     }
 
-
     @PostMapping("/subscribe_writing/{roomId}")
     ResponseEntity<?> subscribe(
             @PathVariable("roomId") String roomId,
             @RequestHeader("x-jwt-userId") String userId,
-            @RequestHeader("x-jwt-username") String username
-    ) {
+            @RequestHeader("x-jwt-username") String username) {
 
-        if(userId.isEmpty()  || username.isEmpty()) {
+        if (userId.isEmpty() || username.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
