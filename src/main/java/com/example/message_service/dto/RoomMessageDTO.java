@@ -3,11 +3,11 @@ package com.example.message_service.dto;
 import lombok.Data;
 
 @Data
-public class RoomMessage {
+public class RoomMessageDTO {
 
-    private RoomMessageSender sender;
+    private RoomMember sender;
+
     private RoomMessageAction action;
 
     private String targetRoomId;
-    private String content;
 }
