@@ -49,6 +49,10 @@ public class ExternalRoomService {
         return response.getBody();
     }
 
+    public void removeMember(String memberId) throws RestClientException {
+        restTemplate.delete(roomServiceUrl + "/members/" + memberId);
+    }
+
     public boolean checkRoomExists(String roomId) {
 
         try {
