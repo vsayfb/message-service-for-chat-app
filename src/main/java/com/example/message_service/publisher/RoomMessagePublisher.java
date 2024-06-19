@@ -14,7 +14,7 @@ public class RoomMessagePublisher {
         this.template = template;
     }
 
-    void publish(RoomMessage message) {
+    public void publish(RoomMessage message) {
         template.convertAndSend(message.getDestination(), message);
     }
 }
