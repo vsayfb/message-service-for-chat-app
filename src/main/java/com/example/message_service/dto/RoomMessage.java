@@ -4,8 +4,10 @@ import lombok.Data;
 
 @Data
 public class RoomMessage {
-    private String roomId;
+
+    private RoomMessageSender sender;
+    private RoomMessageAction action;
+
+    private String targetRoomId;
     private String content;
-    private String userId;
-    private String username;
 }
