@@ -69,6 +69,9 @@ public class SubscriptionInterceptor implements ChannelInterceptor {
 
             } catch (RestClientException e) {
                 return null;
+            } catch (Exception e) {
+                // TODO: handle exception
+                return null;
             }
 
         }
@@ -94,7 +97,7 @@ public class SubscriptionInterceptor implements ChannelInterceptor {
 
                 RoomMessage roomMessage = new RoomMessage();
 
-                roomMessage.setDestination("/topics/" + websocketSession.getRoomId());
+                roomMessage.setDestination("/topic/" + websocketSession.getRoomId());
 
                 RoomMember roomMember = new RoomMember();
 
