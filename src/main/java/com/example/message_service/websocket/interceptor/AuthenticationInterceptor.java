@@ -19,6 +19,10 @@ public class AuthenticationInterceptor implements ChannelInterceptor {
 
         if (StompCommand.SEND.equals(accessor.getCommand())) {
 
+            if (!accessor.getDestination().startsWith("/messages/")) {
+                return null;
+            }
+
             Map<String, Object> session = accessor.getSessionAttributes();
 
             if (session.isEmpty()) {
