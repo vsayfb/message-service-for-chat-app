@@ -1,5 +1,6 @@
 package com.example.message_service.publisher;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +11,7 @@ public class RoomMessagePublisher {
 
     private final SimpMessagingTemplate template;
 
-    public RoomMessagePublisher(SimpMessagingTemplate template) {
+    public RoomMessagePublisher(@Lazy SimpMessagingTemplate template) {
         this.template = template;
     }
 
