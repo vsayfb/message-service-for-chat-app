@@ -1,32 +1,38 @@
 package com.example.message_service.websocket.interceptor;
 
 import com.example.message_service.external.ExternalRoomService;
+import com.example.message_service.external.dto.NewMemberResponse;
+import com.example.message_service.jwt.JWTValidator;
+import com.example.message_service.jwt.claims.JWTClaims;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.web.client.HttpClientErrorException;
 
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.HashMap;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class SubscriptionInterceptorTest {
 
-
     @Mock
     private ExternalRoomService externalRoomService;
+
+    @Mock
+    private JWTValidator jwtValidator;
 
     @Mock
     private Message<String> message;
@@ -37,7 +43,13 @@ public class SubscriptionInterceptorTest {
     @InjectMocks
     private SubscriptionInterceptor subscriptionInterceptor;
 
+    @Test
+    void shouldReturnMessageIfCommandNotSubscribe() {
 
+        Message<?> result = subscriptionInterceptor.preSend(message, messageChannel);
+
+        assertNotNull(result);
+    }
 
     @Test
     void shouldReturnNullWhenDestEmpty() {
@@ -82,15 +94,40 @@ public class SubscriptionInterceptorTest {
     }
 
     @Test
-    void shouldReturnNullWhenDestRoomNotExist() {
+    void shouldReturnMessageIfClientIsNotAuthenticated() {
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
 
         headerAccessor.setDestination("/topic/12312412");
+        headerAccessor.setNativeHeader("Authorization", null);
 
         when(message.getHeaders()).thenReturn(headerAccessor.toMessageHeaders());
 
-        when(externalRoomService.checkRoomExists(anyString())).thenReturn(false);
+        when(jwtValidator.validateToken(any())).thenReturn(Optional.empty());
+
+        Message<?> result = subscriptionInterceptor.preSend(message, messageChannel);
+
+        assertNotNull(result);
+
+    }
+
+    @Test
+    void shouldReturnNullIfExternalErrorOccurs() {
+
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+
+        headerAccessor.setDestination("/topic/12312412");
+        headerAccessor.setNativeHeader("Authorization", "ey");
+
+        when(message.getHeaders()).thenReturn(headerAccessor.toMessageHeaders());
+
+        JWTClaims claims = new JWTClaims();
+
+        claims.setUserId("123456");
+
+        when(jwtValidator.validateToken("ey")).thenReturn(Optional.of(claims));
+
+        when(externalRoomService.addNewMember(claims, "12312412")).thenThrow(HttpClientErrorException.Forbidden.class);
 
         Message<?> result = subscriptionInterceptor.preSend(message, messageChannel);
 
@@ -98,31 +135,38 @@ public class SubscriptionInterceptorTest {
     }
 
     @Test
-    void shouldReturnMessageIfCommandNotSubscribe() {
+    void shouldPutSessionAttributesAndReturnMessage() {
 
-        Message<?> result = subscriptionInterceptor.preSend(message, messageChannel);
-
-        assertNotNull(result);
-    }
-
-    @Test
-    void shouldReturnMessage() {
-
-        GenericMessage<String> genericMessage = new GenericMessage<>("hello there");
+        GenericMessage<String> genericMessage = new GenericMessage<>("");
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
+
         headerAccessor.setDestination("/topic/12312412");
+        headerAccessor.setNativeHeader("Authorization", "ey");
+        headerAccessor.setSessionAttributes(new HashMap<>());
 
         Message<String> messageWithHeaders = MessageBuilder.createMessage(
                 genericMessage.getPayload(),
-                headerAccessor.getMessageHeaders()
-        );
+                headerAccessor.getMessageHeaders());
 
-        when(externalRoomService.checkRoomExists("12312412")).thenReturn(true);
+        JWTClaims claims = new JWTClaims();
+
+        claims.setUserId("123456");
+
+        when(jwtValidator.validateToken("ey")).thenReturn(Optional.of(claims));
+
+        NewMemberResponse memberResponse = new NewMemberResponse();
+
+        memberResponse.setUserId(claims.getUserId());
+
+        when(externalRoomService.addNewMember(claims, "12312412")).thenReturn(memberResponse);
 
         Message<?> result = subscriptionInterceptor.preSend(messageWithHeaders, messageChannel);
 
         assertNotNull(result);
-        assertEquals("hello there", result.getPayload());
+
+        NewMemberResponse accessor = (NewMemberResponse) headerAccessor.getSessionAttributes().get("user");
+
+        assertEquals(accessor.getUserId(), claims.getUserId());
     }
 }
