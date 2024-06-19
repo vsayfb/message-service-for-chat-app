@@ -1,5 +1,6 @@
 package com.example.message_service.websocket;
 
+import com.example.message_service.websocket.interceptor.AuthenticationInterceptor;
 import com.example.message_service.websocket.interceptor.SubscriptionInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -14,12 +15,16 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final SubscriptionInterceptor subscriptionInterceptor;
+    private final AuthenticationInterceptor authenticationInterceptor;
 
     @Value("${stomp.broker.host:localhost}")
     private String host;
 
-    public WebSocketConfig(SubscriptionInterceptor authenticationInterceptor) {
-        this.subscriptionInterceptor = authenticationInterceptor;
+    public WebSocketConfig(
+            SubscriptionInterceptor subscriptionInterceptor,
+            AuthenticationInterceptor authenticationInterceptor) {
+        this.subscriptionInterceptor = subscriptionInterceptor;
+        this.authenticationInterceptor = authenticationInterceptor;
     }
 
     @Override
@@ -30,7 +35,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(subscriptionInterceptor);
+        registration.interceptors(authenticationInterceptor, subscriptionInterceptor);
     }
 
     @Override
