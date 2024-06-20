@@ -44,7 +44,7 @@ public class WebSocketListener {
 
             RoomMessage roomMessage = new RoomMessage();
 
-            roomMessage.setDestination("/topics/" + websocketSession.getRoomId());
+            roomMessage.setDestination("/topic/" + websocketSession.getRoomId());
 
             RoomMember roomMember = new RoomMember();
 
@@ -57,11 +57,11 @@ public class WebSocketListener {
             messageAction.setType(RoomMessageAction.Type.LEAVE);
             messageAction.setSubject(roomMember);
 
+            roomMessage.setAction(messageAction);
+
             roomMessagePublisher.publish(roomMessage);
-
         } catch (Exception e) {
-
+            // TODO: handle exception
         }
-
     }
 }
