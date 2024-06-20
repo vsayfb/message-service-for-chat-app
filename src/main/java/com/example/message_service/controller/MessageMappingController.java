@@ -26,7 +26,7 @@ public class MessageMappingController {
 
         RoomMessage roomMessage = new RoomMessage();
 
-        roomMessage.setDestination("/topics/" + roomId);
+        roomMessage.setDestination("/topic/" + roomId);
 
         RoomMember roomMember = new RoomMember();
 
@@ -40,6 +40,8 @@ public class MessageMappingController {
 
         messageAction.setType(RoomMessageAction.Type.STANDARD);
         messageAction.setSubject(messagePayload);
+
+        roomMessage.setAction(messageAction);
 
         return roomMessage;
     }
