@@ -16,6 +16,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.example.message_service.external.dto.NewMemberResponse;
 import com.example.message_service.jwt.claims.JWTClaims;
+import com.fasterxml.jackson.annotation.ObjectIdGenerator;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 
@@ -37,7 +39,7 @@ public class ExternalRoomServiceContractTest {
             return builder
                     .given("a non-existent room")
                     .uponReceiving("a request to create a member")
-                    .path("/members/new/123")
+                    .path("/members/new/6674b4a698b0a4540875145f")
                     .method("POST")
                     .willRespondWith()
                     .status(403)
@@ -59,7 +61,7 @@ public class ExternalRoomServiceContractTest {
             claims.setUserId("1234567");
             claims.setUsername("walter");
 
-            String roomId = "123";
+            String roomId = "6674b4a698b0a4540875145f";
 
             assertThrows(RestClientException.class, () -> externalRoomService.addNewMember(claims, roomId));
         }
@@ -69,7 +71,7 @@ public class ExternalRoomServiceContractTest {
 
             return builder.given("an existent room")
                     .uponReceiving("a request to create new member")
-                    .path("/members/new/345")
+                    .path("/members/new/6674b4a698b0a4540875145f")
                     .method("POST")
                     .body(newJsonBody(json -> {
                         json.stringType("userId", "1234567");
@@ -104,7 +106,7 @@ public class ExternalRoomServiceContractTest {
             claims.setUserId("1234567");
             claims.setUsername("walter");
 
-            String roomId = "345";
+            String roomId = "6674b4a698b0a4540875145f";
 
             NewMemberResponse newMember = externalRoomService.addNewMember(claims, roomId);
 
@@ -120,7 +122,7 @@ public class ExternalRoomServiceContractTest {
 
             return builder.given("an existent member")
                     .uponReceiving("a request to remove member")
-                    .path("/members/345")
+                    .path("/members/6674b4a698b0a4540875145f")
                     .method("DELETE")
                     .willRespondWith()
                     .status(200)
@@ -138,7 +140,7 @@ public class ExternalRoomServiceContractTest {
 
             externalRoomService.setRoomServiceUrl(mockServer.getUrl());
 
-            assertDoesNotThrow(() -> externalRoomService.removeMember("345"));
+            assertDoesNotThrow(() -> externalRoomService.removeMember("6674b4a698b0a4540875145f"));
         }
 
     }
