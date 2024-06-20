@@ -110,6 +110,8 @@ public class SubscriptionInterceptor implements ChannelInterceptor {
                 messageAction.setType(RoomMessageAction.Type.JOIN);
                 messageAction.setSubject(roomMember);
 
+                roomMessage.setAction(messageAction);
+
                 roomMessagePublisher.publish(roomMessage);
             } catch (Exception e) {
                 // TODO: handle exception
