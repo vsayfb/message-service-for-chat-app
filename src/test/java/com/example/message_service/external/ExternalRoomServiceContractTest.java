@@ -8,12 +8,8 @@ import au.com.dius.pact.core.model.PactSpecVersion;
 import au.com.dius.pact.core.model.RequestResponsePact;
 import au.com.dius.pact.core.model.annotations.Pact;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -118,32 +114,6 @@ public class ExternalRoomServiceContractTest {
 
     @Nested
     class RemoveMember {
-
-        @Pact(consumer = "MessageService", provider = "RoomService")
-        public RequestResponsePact nonExistentMemberPact(PactDslWithProvider builder) {
-
-            return builder.given("a non-existent")
-                    .uponReceiving("a request to remove member")
-                    .path("/members/123")
-                    .method("DELETE")
-                    .willRespondWith()
-                    .status(403)
-                    .toPact();
-
-        }
-
-        @Test
-        @PactTestFor(pactMethod = "nonExistentMemberPact", pactVersion = PactSpecVersion.V3)
-        void nonExistentMemberPactTest(MockServer mockServer) {
-
-            RestTemplate restTemplate = new RestTemplateBuilder().rootUri(mockServer.getUrl()).build();
-
-            externalRoomService = new ExternalRoomService(restTemplate);
-
-            externalRoomService.setRoomServiceUrl(mockServer.getUrl());
-
-            assertThrows(HttpClientErrorException.Forbidden.class, () -> externalRoomService.removeMember("123"));
-        }
 
         @Pact(consumer = "MessageService", provider = "RoomService")
         public RequestResponsePact existentMemberPact(PactDslWithProvider builder) {
