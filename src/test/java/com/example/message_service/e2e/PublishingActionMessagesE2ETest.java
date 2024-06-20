@@ -9,7 +9,6 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
@@ -17,7 +16,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -54,13 +52,13 @@ public class PublishingActionMessagesE2ETest {
     @LocalServerPort
     private int port;
 
-    private String roomId = UUID.randomUUID().toString();
-
-    private String destination = "/topic/" + roomId;
-
     @Test
     void shouldJoinMessageBePublishedWhenNewMemberJoinsRoom()
             throws Exception {
+
+        String roomId = UUID.randomUUID().toString();
+
+        String destination = "/topic/" + roomId;
 
         webSocketHelper.setMessageConverter(new MappingJackson2MessageConverter());
 
@@ -87,7 +85,7 @@ public class PublishingActionMessagesE2ETest {
 
         AtomicInteger index = new AtomicInteger(0);
 
-        NewMemberResponse[] members = createMembers(100);
+        NewMemberResponse[] members = addMembers(100, roomId);
 
         for (int i = 0; i < 100; i++) {
 
@@ -100,16 +98,83 @@ public class PublishingActionMessagesE2ETest {
                         }
                     });
 
-            subscribeRoom(members[i]);
+            subscribeRoom(members[i], destination);
 
         }
 
         boolean allPublished = latch.await(5, TimeUnit.SECONDS);
 
+        assertTrue(latch.getCount() == 0);
+
         assertTrue(allPublished);
     }
 
-    private StompSession subscribeRoom(NewMemberResponse member) throws Exception {
+    @Test
+    void shouldLeaveMessageBePublishedWhenMemberLeavesRoom()
+            throws Exception {
+
+        String roomId = UUID.randomUUID().toString();
+
+        String destination = "/topic/" + roomId;
+
+        webSocketHelper.setMessageConverter(new MappingJackson2MessageConverter());
+
+        AtomicInteger index = new AtomicInteger(0);
+
+        NewMemberResponse[] members = addMembers(100, roomId);
+
+        StompSession[] stompSessions = new StompSession[100];
+
+        for (int i = 0; i < 100; i++) {
+
+            when(externalRoomService.addNewMember(any(JWTClaims.class), eq(roomId)))
+                    .thenAnswer(new Answer<NewMemberResponse>() {
+
+                        @Override
+                        public NewMemberResponse answer(InvocationOnMock invocation) throws Throwable {
+                            return members[index.incrementAndGet()];
+                        }
+                    });
+
+            stompSessions[i] = subscribeRoom(members[i], destination);
+        }
+
+        StompSession session = webSocketHelper.connect("rooms", port);
+
+        CountDownLatch latch = new CountDownLatch(99);
+
+        session.subscribe(destination, new StompFrameHandler() {
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return RoomMessage.class;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+
+                RoomMessage message = (RoomMessage) payload;
+
+                assertEquals(message.getAction().getType(), RoomMessageAction.Type.LEAVE);
+
+                latch.countDown();
+            }
+        });
+
+        for (int i = 0; i < stompSessions.length; i++) {
+
+            assertTrue(stompSessions[i].isConnected());
+
+            stompSessions[i].disconnect();
+        }
+
+        boolean allPublished = latch.await(5, TimeUnit.SECONDS);
+
+        assertTrue(latch.getCount() == 0);
+
+        assertTrue(allPublished);
+    }
+
+    private StompSession subscribeRoom(NewMemberResponse member, String destination) throws Exception {
 
         jwtHelper.setUserId(member.getUserId());
         jwtHelper.setUsername(member.getUsername());
@@ -138,7 +203,7 @@ public class PublishingActionMessagesE2ETest {
         return stompSession;
     }
 
-    private NewMemberResponse[] createMembers(int length) {
+    private NewMemberResponse[] addMembers(int length, String roomId) {
 
         NewMemberResponse[] members = new NewMemberResponse[length];
 
