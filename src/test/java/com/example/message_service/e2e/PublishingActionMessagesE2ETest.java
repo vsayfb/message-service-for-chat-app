@@ -1,11 +1,9 @@
 package com.example.message_service.e2e;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Type;
@@ -176,8 +174,7 @@ public class PublishingActionMessagesE2ETest {
 
     private StompSession subscribeRoom(NewMemberResponse member, String destination) throws Exception {
 
-        jwtHelper.setUserId(member.getUserId());
-        jwtHelper.setUsername(member.getUsername());
+        jwtHelper.setUserId(member.getId());
 
         String token = jwtHelper.sign();
 
@@ -210,10 +207,8 @@ public class PublishingActionMessagesE2ETest {
         for (int i = 0; i < members.length; i++) {
             NewMemberResponse newMember = new NewMemberResponse();
 
-            newMember.setUserId(UUID.randomUUID().toString());
-            newMember.setUsername(generateRandomString());
+            newMember.setId(UUID.randomUUID().toString());
             newMember.setRoomId(roomId);
-            newMember.setMemberId(UUID.randomUUID().toString());
             newMember.setJoinedAt(new Date().toString());
 
             members[i] = newMember;

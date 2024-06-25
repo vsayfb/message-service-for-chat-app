@@ -103,10 +103,8 @@ public class PublishingMessagesE2ETest {
 
         NewMemberResponse newMember = new NewMemberResponse();
 
-        newMember.setMemberId(UUID.randomUUID().toString());
+        newMember.setId(UUID.randomUUID().toString());
         newMember.setRoomId(roomId);
-        newMember.setUserId(clientId);
-        newMember.setUsername(clientUsername);
         newMember.setJoinedAt(new Date().toString());
 
         when(externalRoomService.addNewMember(any(), any())).thenReturn(newMember);

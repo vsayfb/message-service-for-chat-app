@@ -1,5 +1,6 @@
 package com.example.message_service.websocket.interceptor;
 
+import com.example.message_service.dto.WebSocketSessionDTO;
 import com.example.message_service.external.ExternalRoomService;
 import com.example.message_service.external.dto.NewMemberResponse;
 import com.example.message_service.jwt.JWTValidator;
@@ -123,7 +124,7 @@ public class SubscriptionInterceptorTest {
 
         JWTClaims claims = new JWTClaims();
 
-        claims.setUserId("123456");
+        claims.setSub("123456");
 
         when(jwtValidator.validateToken("ey")).thenReturn(Optional.of(claims));
 
@@ -151,13 +152,13 @@ public class SubscriptionInterceptorTest {
 
         JWTClaims claims = new JWTClaims();
 
-        claims.setUserId("123456");
+        claims.setSub("123456");
 
         when(jwtValidator.validateToken("ey")).thenReturn(Optional.of(claims));
 
         NewMemberResponse memberResponse = new NewMemberResponse();
 
-        memberResponse.setUserId(claims.getUserId());
+        memberResponse.setId(claims.getSub());
 
         when(externalRoomService.addNewMember(claims, "12312412")).thenReturn(memberResponse);
 
@@ -165,8 +166,8 @@ public class SubscriptionInterceptorTest {
 
         assertNotNull(result);
 
-        NewMemberResponse accessor = (NewMemberResponse) headerAccessor.getSessionAttributes().get("user");
+        WebSocketSessionDTO accessor = (WebSocketSessionDTO) headerAccessor.getSessionAttributes().get("user");
 
-        assertEquals(accessor.getUserId(), claims.getUserId());
+        assertEquals(accessor.getUserId(), claims.getUsername());
     }
 }

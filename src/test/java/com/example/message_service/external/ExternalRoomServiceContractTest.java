@@ -10,14 +10,11 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.MediaType;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.message_service.external.dto.NewMemberResponse;
 import com.example.message_service.jwt.claims.JWTClaims;
-import com.fasterxml.jackson.annotation.ObjectIdGenerator;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 
@@ -58,7 +55,7 @@ public class ExternalRoomServiceContractTest {
 
             JWTClaims claims = new JWTClaims();
 
-            claims.setUserId("1234567");
+            claims.setSub("1234567");
             claims.setUsername("walter");
 
             String roomId = "6674b4a698b0a4540875145f";
@@ -103,14 +100,14 @@ public class ExternalRoomServiceContractTest {
 
             JWTClaims claims = new JWTClaims();
 
-            claims.setUserId("1234567");
+            claims.setSub("1234567");
             claims.setUsername("walter");
 
             String roomId = "6674b4a698b0a4540875145f";
 
             NewMemberResponse newMember = externalRoomService.addNewMember(claims, roomId);
 
-            assertEquals(newMember.getMemberId(), "123456");
+            assertEquals(newMember.getId(), "123456");
         }
     }
 
