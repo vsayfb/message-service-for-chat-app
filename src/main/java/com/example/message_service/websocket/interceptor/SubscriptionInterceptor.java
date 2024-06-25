@@ -28,7 +28,7 @@ public class SubscriptionInterceptor implements ChannelInterceptor {
 
     private final RoomMessagePublisher roomMessagePublisher;
 
-    private JWTValidator jwtValidator;
+    private final JWTValidator jwtValidator;
 
     public SubscriptionInterceptor(ExternalRoomService externalRoomService, JWTValidator jwtValidator,
                                    RoomMessagePublisher roomMessagePublisher) {
@@ -66,18 +66,19 @@ public class SubscriptionInterceptor implements ChannelInterceptor {
             try {
 
 
-                NewMemberResponse newMember = externalRoomService.addNewMember(optionalJWT.get(), roomId);
-
                 WebSocketSessionDTO sessionDTO = new WebSocketSessionDTO();
 
-                JWTClaims claims = optionalJWT.get();
+                NewMemberResponse newMember = externalRoomService.addNewMember(optionalJWT.get(), roomId);
 
-                sessionDTO.setUserId(claims.getId());
-                sessionDTO.setUsername(claims.getUsername());
-                sessionDTO.setProfilePicture(claims.getProfilePicture());
                 sessionDTO.setMemberId(newMember.getId());
                 sessionDTO.setJoinedAt(newMember.getJoinedAt());
                 sessionDTO.setRoomId(newMember.getRoomId());
+
+                JWTClaims claims = optionalJWT.get();
+
+                sessionDTO.setUserId(claims.getSub());
+                sessionDTO.setUsername(claims.getUsername());
+                sessionDTO.setProfilePicture(claims.getProfilePicture());
 
                 headerAccessor.getSessionAttributes().put("user", sessionDTO);
 
