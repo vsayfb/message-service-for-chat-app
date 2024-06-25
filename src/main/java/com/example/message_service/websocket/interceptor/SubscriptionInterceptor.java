@@ -3,6 +3,7 @@ package com.example.message_service.websocket.interceptor;
 import com.example.message_service.dto.RoomMember;
 import com.example.message_service.dto.RoomMessage;
 import com.example.message_service.dto.RoomMessageAction;
+import com.example.message_service.dto.WebSocketSessionDTO;
 import com.example.message_service.external.ExternalRoomService;
 import com.example.message_service.external.dto.NewMemberResponse;
 import com.example.message_service.jwt.JWTValidator;
@@ -63,9 +64,22 @@ public class SubscriptionInterceptor implements ChannelInterceptor {
             }
 
             try {
+
+
                 NewMemberResponse newMember = externalRoomService.addNewMember(optionalJWT.get(), roomId);
 
-                headerAccessor.getSessionAttributes().put("user", newMember);
+                WebSocketSessionDTO sessionDTO = new WebSocketSessionDTO();
+
+                JWTClaims claims = optionalJWT.get();
+
+                sessionDTO.setUserId(claims.getId());
+                sessionDTO.setUsername(claims.getUsername());
+                sessionDTO.setProfilePicture(claims.getProfilePicture());
+                sessionDTO.setMemberId(newMember.getId());
+                sessionDTO.setJoinedAt(newMember.getJoinedAt());
+                sessionDTO.setRoomId(newMember.getRoomId());
+
+                headerAccessor.getSessionAttributes().put("user", sessionDTO);
 
             } catch (RestClientException e) {
                 return null;
@@ -101,7 +115,7 @@ public class SubscriptionInterceptor implements ChannelInterceptor {
 
                 RoomMember roomMember = new RoomMember();
 
-                roomMember.setMemberId(websocketSession.getMemberId());
+                roomMember.setMemberId(websocketSession.getId());
                 roomMember.setUserId(websocketSession.getUserId());
                 roomMember.setUsername(websocketSession.getUsername());
 
