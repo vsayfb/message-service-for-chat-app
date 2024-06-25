@@ -10,14 +10,11 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.MediaType;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.message_service.external.dto.NewMemberResponse;
 import com.example.message_service.jwt.claims.JWTClaims;
-import com.fasterxml.jackson.annotation.ObjectIdGenerator;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 
@@ -39,8 +36,16 @@ public class ExternalRoomServiceContractTest {
             return builder
                     .given("a non-existent room")
                     .uponReceiving("a request to create a member")
-                    .path("/members/new/6674b4a698b0a4540875145f")
+                    .path("/members/new/58f50c7c-a58f-4bfc-a47b-af17f9dcac8c")
+                    .matchHeader("content-type", MediaType.APPLICATION_JSON_VALUE)
                     .method("POST")
+                    .body(newJsonBody(json -> {
+                        json.stringType("userId");
+                        json.stringType("username");
+                        json.stringType("profilePicture");
+
+                    }).build())
+                    .matchHeader("content-type", MediaType.APPLICATION_JSON_VALUE)
                     .willRespondWith()
                     .status(403)
                     .toPact();
@@ -58,10 +63,11 @@ public class ExternalRoomServiceContractTest {
 
             JWTClaims claims = new JWTClaims();
 
-            claims.setUserId("1234567");
+            claims.setSub("1234567");
             claims.setUsername("walter");
+            claims.setProfilePicture("http://");
 
-            String roomId = "6674b4a698b0a4540875145f";
+            String roomId = "58f50c7c-a58f-4bfc-a47b-af17f9dcac8c";
 
             assertThrows(RestClientException.class, () -> externalRoomService.addNewMember(claims, roomId));
         }
@@ -71,22 +77,22 @@ public class ExternalRoomServiceContractTest {
 
             return builder.given("an existent room")
                     .uponReceiving("a request to create new member")
-                    .path("/members/new/6674b4a698b0a4540875145f")
+                    .path("/members/new/4fab9115-6d6e-4e1b-8b3e-93078ed5cd48")
                     .method("POST")
                     .body(newJsonBody(json -> {
-                        json.stringType("userId", "1234567");
-                        json.stringType("username", "walter");
+                        json.stringType("userId");
+                        json.stringType("username");
+                        json.stringType("profilePicture");
+
                     }).build())
                     .matchHeader("content-type", MediaType.APPLICATION_JSON_VALUE)
                     .willRespondWith()
                     .matchHeader("content-type", MediaType.APPLICATION_JSON_VALUE)
                     .status(201)
                     .body(newJsonBody(json -> {
-                        json.stringType("memberId", "123456");
-                        json.stringType("roomId", "345");
-                        json.stringType("userId", "1234567");
-                        json.stringType("username", "walter");
-                        json.date("joinedAt", "yyyy-MM-dd'T'HH:mm:ssXXX");
+                        json.stringType("id");
+                        json.stringType("roomId", "4fab9115-6d6e-4e1b-8b3e-93078ed5cd48");
+                        json.date("joinedAt", "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
                     }).build())
                     .toPact();
         }
@@ -103,14 +109,15 @@ public class ExternalRoomServiceContractTest {
 
             JWTClaims claims = new JWTClaims();
 
-            claims.setUserId("1234567");
+            claims.setSub("1234567");
             claims.setUsername("walter");
+            claims.setProfilePicture("http://");
 
-            String roomId = "6674b4a698b0a4540875145f";
+            String roomId = "4fab9115-6d6e-4e1b-8b3e-93078ed5cd48";
 
             NewMemberResponse newMember = externalRoomService.addNewMember(claims, roomId);
 
-            assertEquals(newMember.getMemberId(), "123456");
+            assertEquals(newMember.getRoomId(), roomId);
         }
     }
 
@@ -122,7 +129,7 @@ public class ExternalRoomServiceContractTest {
 
             return builder.given("an existent member")
                     .uponReceiving("a request to remove member")
-                    .path("/members/6674b4a698b0a4540875145f")
+                    .path("/members/98696d01-77e0-4147-aac4-2629952742ec")
                     .method("DELETE")
                     .willRespondWith()
                     .status(200)
@@ -140,7 +147,7 @@ public class ExternalRoomServiceContractTest {
 
             externalRoomService.setRoomServiceUrl(mockServer.getUrl());
 
-            assertDoesNotThrow(() -> externalRoomService.removeMember("6674b4a698b0a4540875145f"));
+            assertDoesNotThrow(() -> externalRoomService.removeMember("98696d01-77e0-4147-aac4-2629952742ec"));
         }
 
     }
