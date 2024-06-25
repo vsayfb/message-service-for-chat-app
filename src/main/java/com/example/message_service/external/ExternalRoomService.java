@@ -38,7 +38,8 @@ public class ExternalRoomService {
         HashMap<String, String> body = new HashMap<>();
 
         body.put("username", claims.getUsername());
-        body.put("userId", claims.getUserId());
+        body.put("userId", claims.getSub());
+        body.put("profilePicture", claims.getProfilePicture());
 
         HttpEntity<HashMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
 

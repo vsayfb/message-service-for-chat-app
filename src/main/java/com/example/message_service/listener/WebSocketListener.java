@@ -2,6 +2,7 @@ package com.example.message_service.listener;
 
 import java.util.Map;
 
+import com.example.message_service.dto.WebSocketSessionDTO;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
@@ -37,7 +38,7 @@ public class WebSocketListener {
             return;
         }
 
-        NewMemberResponse websocketSession = (NewMemberResponse) sessionAttributes.get("user");
+        WebSocketSessionDTO websocketSession = (WebSocketSessionDTO) sessionAttributes.get("user");
 
         try {
             externalRoomService.removeMember(websocketSession.getMemberId());
@@ -51,6 +52,7 @@ public class WebSocketListener {
             roomMember.setMemberId(websocketSession.getMemberId());
             roomMember.setUserId(websocketSession.getUserId());
             roomMember.setUsername(websocketSession.getUsername());
+            roomMember.setProfilePicture(websocketSession.getProfilePicture());
 
             RoomMessageAction<RoomMember> messageAction = new RoomMessageAction<>();
 

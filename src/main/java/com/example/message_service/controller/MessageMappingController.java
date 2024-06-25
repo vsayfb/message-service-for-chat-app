@@ -1,7 +1,7 @@
 package com.example.message_service.controller;
 
+import com.example.message_service.dto.WebSocketSessionDTO;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.example.message_service.dto.RoomMember;
@@ -22,7 +22,7 @@ public class MessageMappingController {
             @DestinationVariable String roomId,
             StompHeaderAccessor accessor) {
 
-        NewMemberResponse websocketSession = (NewMemberResponse) accessor.getSessionAttributes().get("user");
+        WebSocketSessionDTO websocketSession = (WebSocketSessionDTO) accessor.getSessionAttributes().get("user");
 
         RoomMessage roomMessage = new RoomMessage();
 
@@ -33,6 +33,7 @@ public class MessageMappingController {
         roomMember.setUsername(websocketSession.getUsername());
         roomMember.setUserId(websocketSession.getUserId());
         roomMember.setMemberId(websocketSession.getMemberId());
+        roomMember.setProfilePicture(websocketSession.getProfilePicture());
 
         roomMessage.setSender(roomMember);
 
