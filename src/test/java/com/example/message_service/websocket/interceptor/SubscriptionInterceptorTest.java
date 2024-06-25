@@ -115,9 +115,11 @@ public class SubscriptionInterceptorTest {
     @Test
     void shouldReturnNullIfExternalErrorOccurs() {
 
+        String roomId = "123456";
+
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
 
-        headerAccessor.setDestination("/topic/12312412");
+        headerAccessor.setDestination("/topic/" + roomId);
         headerAccessor.setNativeHeader("Authorization", "ey");
 
         when(message.getHeaders()).thenReturn(headerAccessor.toMessageHeaders());
@@ -128,7 +130,7 @@ public class SubscriptionInterceptorTest {
 
         when(jwtValidator.validateToken("ey")).thenReturn(Optional.of(claims));
 
-        when(externalRoomService.addNewMember(claims, "12312412")).thenThrow(HttpClientErrorException.Forbidden.class);
+        when(externalRoomService.addNewMember(claims, roomId)).thenThrow(HttpClientErrorException.Forbidden.class);
 
         Message<?> result = subscriptionInterceptor.preSend(message, messageChannel);
 
@@ -142,7 +144,9 @@ public class SubscriptionInterceptorTest {
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
 
-        headerAccessor.setDestination("/topic/12312412");
+        String roomId = "123456";
+
+        headerAccessor.setDestination("/topic/" + roomId);
         headerAccessor.setNativeHeader("Authorization", "ey");
         headerAccessor.setSessionAttributes(new HashMap<>());
 
@@ -152,15 +156,15 @@ public class SubscriptionInterceptorTest {
 
         JWTClaims claims = new JWTClaims();
 
-        claims.setSub("123456");
+        claims.setSub("1234");
 
         when(jwtValidator.validateToken("ey")).thenReturn(Optional.of(claims));
 
         NewMemberResponse memberResponse = new NewMemberResponse();
 
-        memberResponse.setId(claims.getSub());
+        memberResponse.setId("5678");
 
-        when(externalRoomService.addNewMember(claims, "12312412")).thenReturn(memberResponse);
+        when(externalRoomService.addNewMember(claims, roomId)).thenReturn(memberResponse);
 
         Message<?> result = subscriptionInterceptor.preSend(messageWithHeaders, messageChannel);
 
@@ -168,6 +172,7 @@ public class SubscriptionInterceptorTest {
 
         WebSocketSessionDTO accessor = (WebSocketSessionDTO) headerAccessor.getSessionAttributes().get("user");
 
-        assertEquals(accessor.getUserId(), claims.getUsername());
+        assertEquals(accessor.getMemberId(), memberResponse.getId());
+        assertEquals(accessor.getUserId(), claims.getSub());
     }
 }
