@@ -31,7 +31,7 @@ public class SubscriptionInterceptor implements ChannelInterceptor {
     private JWTValidator jwtValidator;
 
     public SubscriptionInterceptor(ExternalRoomService externalRoomService, JWTValidator jwtValidator,
-            RoomMessagePublisher roomMessagePublisher) {
+                                   RoomMessagePublisher roomMessagePublisher) {
         this.externalRoomService = externalRoomService;
         this.jwtValidator = jwtValidator;
         this.roomMessagePublisher = roomMessagePublisher;
@@ -107,7 +107,7 @@ public class SubscriptionInterceptor implements ChannelInterceptor {
             }
 
             try {
-                NewMemberResponse websocketSession = (NewMemberResponse) sessionAttributes.get("user");
+                WebSocketSessionDTO websocketSession = (WebSocketSessionDTO) sessionAttributes.get("user");
 
                 RoomMessage roomMessage = new RoomMessage();
 
@@ -115,9 +115,10 @@ public class SubscriptionInterceptor implements ChannelInterceptor {
 
                 RoomMember roomMember = new RoomMember();
 
-                roomMember.setMemberId(websocketSession.getId());
+                roomMember.setMemberId(websocketSession.getMemberId());
                 roomMember.setUserId(websocketSession.getUserId());
                 roomMember.setUsername(websocketSession.getUsername());
+                roomMember.setProfilePicture(websocketSession.getProfilePicture());
 
                 RoomMessageAction<RoomMember> messageAction = new RoomMessageAction<>();
 

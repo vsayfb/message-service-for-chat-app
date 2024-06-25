@@ -6,6 +6,7 @@ import lombok.Data;
 public class RoomMember {
 
     private String userId;
-    private String memberId;
     private String username;
+    private String profilePicture;
+    private String memberId;
 }
