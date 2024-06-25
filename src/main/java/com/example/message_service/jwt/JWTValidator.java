@@ -1,6 +1,7 @@
 package com.example.message_service.jwt;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.crypto.SecretKey;
 
@@ -26,7 +27,7 @@ public class JWTValidator {
 
     public Optional<JWTClaims> validateToken(String jwt) throws IllegalArgumentException {
 
-        if (jwt == null || jwt.isEmpty() || !jwt.startsWith("Bearer ")) {
+        if (jwt == null || !jwt.startsWith("Bearer ")) {
             return Optional.empty();
         }
 
@@ -40,12 +41,13 @@ public class JWTValidator {
 
             JWTClaims jwtClaims = new JWTClaims();
 
+            jwtClaims.setSub((String) claims.get("sub"));
             jwtClaims.setUsername((String) claims.get("username"));
-            jwtClaims.setUserId((String) claims.get("sub"));
+            jwtClaims.setProfilePicture((String) claims.get("profilePicture"));
+            jwtClaims.setIss(claims.getIssuer());
             jwtClaims.setExp(claims.getExpiration().getTime());
             jwtClaims.setIat(claims.getIssuedAt().getTime());
-            jwtClaims.setIss(claims.getIssuer());
-            jwtClaims.setId(claims.getId());
+            jwtClaims.setJti(UUID.fromString(claims.getId()));
 
             return Optional.of(jwtClaims);
         } catch (JwtException e) {
