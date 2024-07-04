@@ -17,8 +17,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final SubscriptionInterceptor subscriptionInterceptor;
     private final AuthenticationInterceptor authenticationInterceptor;
 
-    @Value("${stomp.broker.host:localhost}")
-    private String host;
+    @Value("${spring.rabbitmq.host}")
+    private String rabbitHost;
+
+    @Value("${spring.rabbitmq.username}")
+    private String rabbitUser;
+
+    @Value("${spring.rabbitmq.password}")
+    private String rabbitPassword;
 
     public WebSocketConfig(
             SubscriptionInterceptor subscriptionInterceptor,
@@ -43,9 +49,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
         registry.setApplicationDestinationPrefixes("/messages")
                 .enableStompBrokerRelay("/topic")
-                .setRelayHost(host)
-                .setRelayPort(61613)
-                .setClientLogin("guest")
-                .setClientPasscode("guest");
+                .setRelayHost(rabbitHost)
+                .setSystemLogin(rabbitUser)
+                .setSystemPasscode(rabbitPassword)
+                .setClientLogin(rabbitUser)
+                .setClientPasscode(rabbitPassword);
     }
 }
