@@ -58,12 +58,11 @@ public class SimpWebSocketSessionManager implements WebSocketSessionManager {
 
     @Override
     public void remove(StompHeaderAccessor accessor) {
-        String token = accessor.getFirstNativeHeader("Authorization");
 
-        Optional<JWTClaims> optionalJWT = jwtValidator.validateToken(token);
+        WebSocketSessionDTO sessionDTO = getAuthenticatedUser(accessor);
 
-        if (optionalJWT.isPresent()) {
-            externalRoomService.removeMember(optionalJWT.get().getSub(), accessor.getSessionId());
+        if (sessionDTO != null) {
+            externalRoomService.removeMember(sessionDTO.getMemberId(), accessor.getSessionId());
         }
 
     }
