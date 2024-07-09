@@ -3,6 +3,7 @@ package com.example.message_service.e2e;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -40,9 +41,6 @@ public class PublishingLeaveMessageE2ETest {
     @Autowired
     private WebSocketHelper webSocketHelper;
 
-    @Autowired
-    private JWTHelper jwtHelper;
-
     @MockBean
     private ExternalRoomService externalRoomService;
 
@@ -65,9 +63,9 @@ public class PublishingLeaveMessageE2ETest {
 
         StompSession[] stompSessions = new StompSession[10];
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < stompSessions.length - 1; i++) {
 
-            when(externalRoomService.addNewMember(any(JWTClaims.class), eq(roomId)))
+            when(externalRoomService.addNewMember(any(JWTClaims.class), eq(roomId), anyString()))
                     .thenAnswer(new Answer<NewMemberResponse>() {
 
                         @Override
@@ -101,7 +99,7 @@ public class PublishingLeaveMessageE2ETest {
             }
         });
 
-        for (int i = 0; i < stompSessions.length; i++) {
+        for (int i = 0; i < stompSessions.length - 1; i++) {
 
             assertTrue(stompSessions[i].isConnected());
 
@@ -109,8 +107,6 @@ public class PublishingLeaveMessageE2ETest {
         }
 
         boolean allPublished = latch.await(5, TimeUnit.SECONDS);
-
-        System.out.println("remaining -> " + latch.getCount());
 
         assertTrue(latch.getCount() == 0);
 

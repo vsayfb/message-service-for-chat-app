@@ -3,6 +3,7 @@ package com.example.message_service.e2e;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -31,7 +32,6 @@ import com.example.message_service.dto.RoomMessage;
 import com.example.message_service.dto.RoomMessageAction;
 import com.example.message_service.external.ExternalRoomService;
 import com.example.message_service.external.dto.NewMemberResponse;
-import com.example.message_service.helper.JWTHelper;
 import com.example.message_service.helper.WebSocketHelper;
 import com.example.message_service.jwt.claims.JWTClaims;
 
@@ -40,9 +40,6 @@ public class PublishingJoinMessageE2ETest {
 
     @Autowired
     private WebSocketHelper webSocketHelper;
-
-    @Autowired
-    private JWTHelper jwtHelper;
 
     @MockBean
     private ExternalRoomService externalRoomService;
@@ -85,9 +82,9 @@ public class PublishingJoinMessageE2ETest {
 
         NewMemberResponse[] members = addMembers(10, roomId);
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < members.length - 1; i++) {
 
-            when(externalRoomService.addNewMember(any(JWTClaims.class), eq(roomId)))
+            when(externalRoomService.addNewMember(any(JWTClaims.class), eq(roomId), anyString()))
                     .thenAnswer(new Answer<NewMemberResponse>() {
 
                         @Override

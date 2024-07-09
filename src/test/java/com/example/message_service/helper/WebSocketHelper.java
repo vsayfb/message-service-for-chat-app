@@ -20,6 +20,7 @@ import com.example.message_service.external.dto.NewMemberResponse;
 import java.lang.reflect.Type;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -59,6 +60,7 @@ public class WebSocketHelper {
             throws UnknownHostException, ExecutionException, InterruptedException {
 
         jwtHelper.setUserId(member.getId());
+        jwtHelper.setUsername(generateRandomString());
 
         String token = jwtHelper.sign();
 
@@ -83,6 +85,23 @@ public class WebSocketHelper {
         });
 
         return stompSession;
+    }
+
+    private String generateRandomString() {
+
+        StringBuilder builder = new StringBuilder();
+
+        Random random = new Random();
+
+        int n = random.nextInt(20);
+
+        for (int i = 0; i < n; i++) {
+
+            builder.append((char) ('a' + random.nextInt(26)));
+
+        }
+
+        return builder.toString();
     }
 
 }
