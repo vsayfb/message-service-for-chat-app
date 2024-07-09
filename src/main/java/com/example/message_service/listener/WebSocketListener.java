@@ -3,6 +3,8 @@ package com.example.message_service.listener;
 import java.util.Map;
 
 import com.example.message_service.dto.WebSocketSessionDTO;
+
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
@@ -14,17 +16,18 @@ import com.example.message_service.dto.RoomMessageAction;
 import com.example.message_service.external.ExternalRoomService;
 import com.example.message_service.external.dto.NewMemberResponse;
 import com.example.message_service.publisher.RoomMessagePublisher;
+import com.example.message_service.websocket.manager.WebSocketSessionManager;
 
 @Component
 public class WebSocketListener {
 
     private final RoomMessagePublisher roomMessagePublisher;
+    private final WebSocketSessionManager webSocketSessionManager;
 
-    private final ExternalRoomService externalRoomService;
-
-    public WebSocketListener(RoomMessagePublisher roomMessagePublisher, ExternalRoomService externalRoomService) {
+    public WebSocketListener(@Qualifier("simp") WebSocketSessionManager webSocketSessionManager,
+            RoomMessagePublisher roomMessagePublisher) {
+        this.webSocketSessionManager = webSocketSessionManager;
         this.roomMessagePublisher = roomMessagePublisher;
-        this.externalRoomService = externalRoomService;
     }
 
     @EventListener
@@ -32,16 +35,10 @@ public class WebSocketListener {
 
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
 
-        Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
-
-        if (sessionAttributes.isEmpty()) {
-            return;
-        }
-
-        WebSocketSessionDTO websocketSession = (WebSocketSessionDTO) sessionAttributes.get("user");
+        WebSocketSessionDTO websocketSession = webSocketSessionManager.getAuthenticatedUser(accessor);
 
         try {
-            externalRoomService.removeMember(websocketSession.getMemberId());
+            webSocketSessionManager.remove(accessor);
 
             RoomMessage roomMessage = new RoomMessage();
 
@@ -63,7 +60,7 @@ public class WebSocketListener {
 
             roomMessagePublisher.publish(roomMessage);
         } catch (Exception e) {
-            // TODO: handle exception
+            System.out.println(e.getMessage());
         }
     }
 }
