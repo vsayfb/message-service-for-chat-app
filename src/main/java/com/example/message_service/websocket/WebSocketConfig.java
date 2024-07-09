@@ -1,6 +1,6 @@
 package com.example.message_service.websocket;
 
-import com.example.message_service.websocket.interceptor.AuthenticationInterceptor;
+import com.example.message_service.websocket.interceptor.AuthorizationInterceptor;
 import com.example.message_service.websocket.interceptor.SubscriptionInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +15,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final SubscriptionInterceptor subscriptionInterceptor;
-    private final AuthenticationInterceptor authenticationInterceptor;
+    private final AuthorizationInterceptor authenticationInterceptor;
 
     @Value("${spring.rabbitmq.host}")
     private String rabbitHost;
@@ -28,7 +28,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     public WebSocketConfig(
             SubscriptionInterceptor subscriptionInterceptor,
-            AuthenticationInterceptor authenticationInterceptor) {
+            AuthorizationInterceptor authenticationInterceptor) {
         this.subscriptionInterceptor = subscriptionInterceptor;
         this.authenticationInterceptor = authenticationInterceptor;
     }

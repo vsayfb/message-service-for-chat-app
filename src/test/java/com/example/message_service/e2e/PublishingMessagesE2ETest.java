@@ -107,7 +107,7 @@ public class PublishingMessagesE2ETest {
         newMember.setRoomId(roomId);
         newMember.setJoinedAt(new Date().toString());
 
-        when(externalRoomService.addNewMember(any(), any())).thenReturn(newMember);
+        when(externalRoomService.addNewMember(any(), any(), any())).thenReturn(newMember);
 
         String destination = "/topic/" + roomId;
 
