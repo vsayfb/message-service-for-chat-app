@@ -57,14 +57,6 @@ public class SimpWebSocketSessionManager implements WebSocketSessionManager {
     }
 
     @Override
-    public boolean isRegistered(StompHeaderAccessor accessor) {
-        WebSocketSessionDTO clientSession = (WebSocketSessionDTO) accessor.getSessionAttributes()
-                .get("user");
-
-        return clientSession != null;
-    }
-
-    @Override
     public void remove(StompHeaderAccessor accessor) {
         String token = accessor.getFirstNativeHeader("Authorization");
 
@@ -74,6 +66,22 @@ public class SimpWebSocketSessionManager implements WebSocketSessionManager {
             externalRoomService.removeMember(optionalJWT.get().getSub(), accessor.getSessionId());
         }
 
+    }
+
+    @Override
+    public WebSocketSessionDTO getAuthenticatedUser(StompHeaderAccessor accessor) {
+        WebSocketSessionDTO clientSession = (WebSocketSessionDTO) accessor.getSessionAttributes()
+                .get("user");
+
+        return clientSession;
+    }
+
+    @Override
+    public boolean isRegistered(StompHeaderAccessor accessor) {
+        WebSocketSessionDTO clientSession = (WebSocketSessionDTO) accessor.getSessionAttributes()
+                .get("user");
+
+        return clientSession != null;
     }
 
     @Override
