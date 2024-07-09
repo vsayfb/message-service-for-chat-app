@@ -1,10 +1,6 @@
 package com.example.message_service.websocket.interceptor;
 
-import com.example.message_service.dto.WebSocketSessionDTO;
-import com.example.message_service.external.ExternalRoomService;
-import com.example.message_service.external.dto.NewMemberResponse;
-import com.example.message_service.jwt.JWTValidator;
-import com.example.message_service.jwt.claims.JWTClaims;
+import com.example.message_service.websocket.manager.SimpWebSocketSessionManager;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,14 +11,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.support.GenericMessage;
-import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.web.client.HttpClientErrorException;
 
 import static org.mockito.Mockito.*;
-
-import java.util.HashMap;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,10 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SubscriptionInterceptorTest {
 
     @Mock
-    private ExternalRoomService externalRoomService;
-
-    @Mock
-    private JWTValidator jwtValidator;
+    private SimpWebSocketSessionManager webSocketSessionManager;
 
     @Mock
     private Message<String> message;
@@ -95,42 +82,15 @@ public class SubscriptionInterceptorTest {
     }
 
     @Test
-    void shouldReturnMessageIfClientIsNotAuthenticated() {
+    void shouldReturnNullIfClientNotAuthenticated() {
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
 
         headerAccessor.setDestination("/topic/12312412");
-        headerAccessor.setNativeHeader("Authorization", null);
 
         when(message.getHeaders()).thenReturn(headerAccessor.toMessageHeaders());
 
-        when(jwtValidator.validateToken(any())).thenReturn(Optional.empty());
-
-        Message<?> result = subscriptionInterceptor.preSend(message, messageChannel);
-
-        assertNotNull(result);
-
-    }
-
-    @Test
-    void shouldReturnNullIfExternalErrorOccurs() {
-
-        String roomId = "123456";
-
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
-
-        headerAccessor.setDestination("/topic/" + roomId);
-        headerAccessor.setNativeHeader("Authorization", "ey");
-
-        when(message.getHeaders()).thenReturn(headerAccessor.toMessageHeaders());
-
-        JWTClaims claims = new JWTClaims();
-
-        claims.setSub("123456");
-
-        when(jwtValidator.validateToken("ey")).thenReturn(Optional.of(claims));
-
-        when(externalRoomService.addNewMember(claims, roomId)).thenThrow(HttpClientErrorException.Forbidden.class);
+        when(webSocketSessionManager.register(any())).thenReturn(false);
 
         Message<?> result = subscriptionInterceptor.preSend(message, messageChannel);
 
@@ -138,41 +98,20 @@ public class SubscriptionInterceptorTest {
     }
 
     @Test
-    void shouldPutSessionAttributesAndReturnMessage() {
-
-        GenericMessage<String> genericMessage = new GenericMessage<>("");
+    void shouldReturnMessageIfClientAuthenticated() {
 
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
 
-        String roomId = "123456";
+        headerAccessor.setDestination("/topic/12312412");
 
-        headerAccessor.setDestination("/topic/" + roomId);
-        headerAccessor.setNativeHeader("Authorization", "ey");
-        headerAccessor.setSessionAttributes(new HashMap<>());
+        when(message.getHeaders()).thenReturn(headerAccessor.toMessageHeaders());
 
-        Message<String> messageWithHeaders = MessageBuilder.createMessage(
-                genericMessage.getPayload(),
-                headerAccessor.getMessageHeaders());
+        when(webSocketSessionManager.register(any())).thenReturn(true);
 
-        JWTClaims claims = new JWTClaims();
-
-        claims.setSub("1234");
-
-        when(jwtValidator.validateToken("ey")).thenReturn(Optional.of(claims));
-
-        NewMemberResponse memberResponse = new NewMemberResponse();
-
-        memberResponse.setId("5678");
-
-        when(externalRoomService.addNewMember(claims, roomId)).thenReturn(memberResponse);
-
-        Message<?> result = subscriptionInterceptor.preSend(messageWithHeaders, messageChannel);
+        Message<?> result = subscriptionInterceptor.preSend(message, messageChannel);
 
         assertNotNull(result);
 
-        WebSocketSessionDTO accessor = (WebSocketSessionDTO) headerAccessor.getSessionAttributes().get("user");
-
-        assertEquals(accessor.getMemberId(), memberResponse.getId());
-        assertEquals(accessor.getUserId(), claims.getSub());
     }
+
 }
