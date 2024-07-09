@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import com.example.message_service.external.dto.NewMemberResponse;
 import com.example.message_service.jwt.claims.JWTClaims;
 
+import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArrayMinLike;
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +43,7 @@ public class ExternalRoomServiceContractTest {
                     .body(newJsonBody(json -> {
                         json.stringType("userId");
                         json.stringType("username");
+                        json.stringType("sessionId");
                         json.stringType("profilePicture");
 
                     }).build())
@@ -68,8 +70,9 @@ public class ExternalRoomServiceContractTest {
             claims.setProfilePicture("http://");
 
             String roomId = "58f50c7c-a58f-4bfc-a47b-af17f9dcac8c";
+            String sessionId = "4fab9115-6d6e-4e1b-8b3e-93078ed5cd47";
 
-            assertThrows(RestClientException.class, () -> externalRoomService.addNewMember(claims, roomId));
+            assertThrows(RestClientException.class, () -> externalRoomService.addNewMember(claims, roomId, sessionId));
         }
 
         @Pact(consumer = "MessageService", provider = "RoomService")
@@ -82,6 +85,7 @@ public class ExternalRoomServiceContractTest {
                     .body(newJsonBody(json -> {
                         json.stringType("userId");
                         json.stringType("username");
+                        json.stringType("sessionId");
                         json.stringType("profilePicture");
 
                     }).build())
@@ -92,6 +96,9 @@ public class ExternalRoomServiceContractTest {
                     .body(newJsonBody(json -> {
                         json.stringType("id");
                         json.stringType("roomId", "4fab9115-6d6e-4e1b-8b3e-93078ed5cd48");
+                        newJsonArrayMinLike(1, array -> {
+                            array.stringType("");
+                        });
                         json.date("joinedAt", "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
                     }).build())
                     .toPact();
@@ -114,8 +121,9 @@ public class ExternalRoomServiceContractTest {
             claims.setProfilePicture("http://");
 
             String roomId = "4fab9115-6d6e-4e1b-8b3e-93078ed5cd48";
+            String sessionId = "4fab9115-6d6e-4e1b-8b3e-93078ed5cd47";
 
-            NewMemberResponse newMember = externalRoomService.addNewMember(claims, roomId);
+            NewMemberResponse newMember = externalRoomService.addNewMember(claims, roomId, sessionId);
 
             assertEquals(newMember.getRoomId(), roomId);
         }
@@ -124,12 +132,15 @@ public class ExternalRoomServiceContractTest {
     @Nested
     class RemoveMember {
 
+        String memberId = "98696d01-77e0-4147-aac4-2629952742ec";
+        String sessionId = "4fab9115-6d6e-4e1b-8b3e-93078ed5cd47";
+
         @Pact(consumer = "MessageService", provider = "RoomService")
         public RequestResponsePact existentMemberPact(PactDslWithProvider builder) {
 
             return builder.given("an existent member")
                     .uponReceiving("a request to remove member")
-                    .path("/members/98696d01-77e0-4147-aac4-2629952742ec")
+                    .path("/members/" + memberId + "/" + sessionId)
                     .method("DELETE")
                     .willRespondWith()
                     .status(200)
@@ -147,7 +158,8 @@ public class ExternalRoomServiceContractTest {
 
             externalRoomService.setRoomServiceUrl(mockServer.getUrl());
 
-            assertDoesNotThrow(() -> externalRoomService.removeMember("98696d01-77e0-4147-aac4-2629952742ec"));
+            assertDoesNotThrow(
+                    () -> externalRoomService.removeMember(memberId, sessionId));
         }
 
     }

@@ -7,5 +7,6 @@ public class NewMemberResponse {
 
     private String id;
     private String roomId;
+    private String[] sessionIds;
     private String joinedAt;
 }

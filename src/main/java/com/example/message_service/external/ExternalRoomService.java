@@ -28,7 +28,7 @@ public class ExternalRoomService {
         this.restTemplate = restTemplate;
     }
 
-    public NewMemberResponse addNewMember(JWTClaims claims, String roomId)
+    public NewMemberResponse addNewMember(JWTClaims claims, String roomId, String sessionId)
             throws RestClientException {
 
         HttpHeaders headers = new HttpHeaders();
@@ -39,6 +39,7 @@ public class ExternalRoomService {
 
         body.put("username", claims.getUsername());
         body.put("userId", claims.getSub());
+        body.put("sessionId", sessionId);
         body.put("profilePicture", claims.getProfilePicture());
 
         HttpEntity<HashMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
@@ -50,8 +51,8 @@ public class ExternalRoomService {
         return response.getBody();
     }
 
-    public void removeMember(String memberId) throws RestClientException {
-        restTemplate.delete(roomServiceUrl + "/members/" + memberId);
+    public void removeMember(String memberId, String sessionId) throws RestClientException {
+        restTemplate.delete(roomServiceUrl + "/members/" + memberId + "/" + sessionId);
     }
 
     public boolean checkRoomExists(String roomId) {
