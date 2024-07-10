@@ -16,7 +16,6 @@ import org.springframework.web.client.RestTemplate;
 import com.example.message_service.external.dto.NewMemberResponse;
 import com.example.message_service.jwt.claims.JWTClaims;
 
-import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonArrayMinLike;
 import static au.com.dius.pact.consumer.dsl.LambdaDsl.newJsonBody;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,7 +36,7 @@ public class ExternalRoomServiceContractTest {
             return builder
                     .given("a non-existent room")
                     .uponReceiving("a request to create a member")
-                    .path("/members/new/58f50c7c-a58f-4bfc-a47b-af17f9dcac8c")
+                    .path("/members/room/58f50c7c-a58f-4bfc-a47b-af17f9dcac8c")
                     .matchHeader("content-type", MediaType.APPLICATION_JSON_VALUE)
                     .method("POST")
                     .body(newJsonBody(json -> {
@@ -80,7 +79,7 @@ public class ExternalRoomServiceContractTest {
 
             return builder.given("an existent room")
                     .uponReceiving("a request to create new member")
-                    .path("/members/new/4fab9115-6d6e-4e1b-8b3e-93078ed5cd48")
+                    .path("/members/room/4fab9115-6d6e-4e1b-8b3e-93078ed5cd48")
                     .method("POST")
                     .body(newJsonBody(json -> {
                         json.stringType("userId");
@@ -140,7 +139,7 @@ public class ExternalRoomServiceContractTest {
 
             return builder.given("an existent member")
                     .uponReceiving("a request to remove member")
-                    .path("/members/" + memberId + "/" + sessionId)
+                    .path("/members/" + memberId + "/session/" + sessionId)
                     .method("DELETE")
                     .willRespondWith()
                     .status(200)

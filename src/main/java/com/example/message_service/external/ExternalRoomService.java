@@ -45,14 +45,14 @@ public class ExternalRoomService {
         HttpEntity<HashMap<String, String>> requestEntity = new HttpEntity<>(body, headers);
 
         ResponseEntity<NewMemberResponse> response = restTemplate
-                .postForEntity(roomServiceUrl + "/members/new/" + roomId, requestEntity,
+                .postForEntity(roomServiceUrl + "/members/room/" + roomId, requestEntity,
                         NewMemberResponse.class);
 
         return response.getBody();
     }
 
     public void removeMember(String memberId, String sessionId) throws RestClientException {
-        restTemplate.delete(roomServiceUrl + "/members/" + memberId + "/" + sessionId);
+        restTemplate.delete(roomServiceUrl + "/members/" + memberId + "/session/" + sessionId);
     }
 
     public void removeMemberByUserId(String userId, String roomId, String sessionId) throws RestClientException {
