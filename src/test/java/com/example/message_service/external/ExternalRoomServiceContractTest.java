@@ -96,7 +96,7 @@ public class ExternalRoomServiceContractTest {
                     .body(newJsonBody(json -> {
                         json.stringType("id");
                         json.stringType("roomId", "4fab9115-6d6e-4e1b-8b3e-93078ed5cd48");
-                        newJsonArrayMinLike(1, array -> {
+                        json.array("sessionIds", array -> {
                             array.stringType("");
                         });
                         json.date("joinedAt", "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
@@ -160,6 +160,85 @@ public class ExternalRoomServiceContractTest {
 
             assertDoesNotThrow(
                     () -> externalRoomService.removeMember(memberId, sessionId));
+        }
+
+    }
+
+    @Nested
+    class RemoveMemberByUserId {
+
+        String userId = "98696d01-77e0-4147-aac4-2629952742ec";
+        String roomId = "98696d01-77e0-4147-aac4-2629952732ec";
+        String sessionId = "4fab9115-6d6e-4e1b-8b3e-93078ed5cd47";
+
+        @Pact(consumer = "MessageService", provider = "RoomService")
+        public RequestResponsePact existentMemberPact(PactDslWithProvider builder) {
+
+            return builder.given("an existent member by user id")
+                    .uponReceiving("a request to remove member")
+                    .path("/members/user/" + userId + "/room/" + roomId + "/session/" + sessionId)
+                    .method("DELETE")
+                    .willRespondWith()
+                    .status(200)
+                    .toPact();
+
+        }
+
+        @Test
+        @PactTestFor(pactMethod = "existentMemberPact", pactVersion = PactSpecVersion.V3)
+        void existentMemberPactTest(MockServer mockServer) {
+
+            RestTemplate restTemplate = new RestTemplateBuilder().rootUri(mockServer.getUrl()).build();
+
+            externalRoomService = new ExternalRoomService(restTemplate);
+
+            externalRoomService.setRoomServiceUrl(mockServer.getUrl());
+
+            assertDoesNotThrow(
+                    () -> externalRoomService.removeMemberByUserId(userId, roomId, sessionId));
+        }
+
+    }
+
+    @Nested
+    class GetMemberByUserIdAndRoomId {
+
+        String userId = "98696d01-77e0-4147-aac4-2629952742ec";
+        String roomId = "4fab9115-6d6e-4e1b-8b3e-93078ed5cd47";
+
+        @Pact(consumer = "MessageService", provider = "RoomService")
+        public RequestResponsePact existentMemberPact(PactDslWithProvider builder) {
+
+            return builder.given("an existent member by user id and room id")
+                    .uponReceiving("a request to get member")
+                    .path("/members/user/" + userId + "/room/" + roomId)
+                    .method("GET")
+                    .willRespondWith()
+                    .body(newJsonBody(json -> {
+                        json.stringType("id");
+                        json.stringType("roomId", "4fab9115-6d6e-4e1b-8b3e-93078ed5cd48");
+                        json.array("sessionIds", array -> {
+                            array.stringType("");
+                        });
+                        json.date("joinedAt", "yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+                    }).build())
+                    .status(200)
+                    .toPact();
+
+        }
+
+        @Test
+        @PactTestFor(pactMethod = "existentMemberPact", pactVersion = PactSpecVersion.V3)
+        void existentMemberPactTest(MockServer mockServer) {
+
+            RestTemplate restTemplate = new RestTemplateBuilder().rootUri(mockServer.getUrl()).build();
+
+            externalRoomService = new ExternalRoomService(restTemplate);
+
+            externalRoomService.setRoomServiceUrl(mockServer.getUrl());
+
+            assertDoesNotThrow(
+                    () -> externalRoomService.getMemberByUserIdAndRoomId(userId, roomId));
         }
 
     }

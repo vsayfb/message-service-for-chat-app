@@ -55,17 +55,17 @@ public class ExternalRoomService {
         restTemplate.delete(roomServiceUrl + "/members/" + memberId + "/" + sessionId);
     }
 
-    public boolean checkRoomExists(String roomId) {
+    public void removeMemberByUserId(String userId, String roomId, String sessionId) throws RestClientException {
+        restTemplate
+                .delete(roomServiceUrl + "/members/user/" + userId + "/room/" + roomId + "/session/" + sessionId);
+    }
 
-        try {
-            ResponseEntity<?> response = restTemplate.getForEntity(roomServiceUrl + "/rooms/" + roomId,
-                    Object.class);
+    public NewMemberResponse getMemberByUserIdAndRoomId(String userId, String roomId)
+            throws RestClientException {
 
-            return response.getStatusCode().equals(HttpStatus.OK);
+        ResponseEntity<NewMemberResponse> response = restTemplate
+                .getForEntity(roomServiceUrl + "/members/user/" + userId + "/room/" + roomId, NewMemberResponse.class);
 
-        } catch (RestClientException e) {
-
-            return false;
-        }
+        return response.getBody();
     }
 }
