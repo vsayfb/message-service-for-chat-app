@@ -32,7 +32,7 @@ public class AuthorizationInterceptor implements ChannelInterceptor {
                 return null;
             }
 
-            if (webSocketSessionManager.isGuest(accessor)) {
+            if (!webSocketSessionManager.isAuthenticated(accessor)) {
                 return null;
             }
 

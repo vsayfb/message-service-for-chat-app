@@ -84,6 +84,15 @@ public class SimpWebSocketSessionManager implements WebSocketSessionManager {
     }
 
     @Override
+    public boolean isAuthenticated(StompHeaderAccessor accessor) {
+
+        WebSocketSessionDTO clientSession = (WebSocketSessionDTO) accessor.getSessionAttributes()
+                .get("user");
+
+        return clientSession != null && !clientSession.getUsername().equals(WebSocketSessionManager.GUEST_USERNAME);
+    }
+
+    @Override
     public boolean isGuest(StompHeaderAccessor accessor) {
         WebSocketSessionDTO clientSession = (WebSocketSessionDTO) accessor.getSessionAttributes()
                 .get("user");

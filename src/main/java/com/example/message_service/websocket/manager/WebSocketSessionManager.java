@@ -17,4 +17,6 @@ public interface WebSocketSessionManager {
     boolean isRegistered(StompHeaderAccessor accessor);
 
     boolean isGuest(StompHeaderAccessor accessor);
+
+    boolean isAuthenticated(StompHeaderAccessor accessor);
 }
