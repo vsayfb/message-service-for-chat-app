@@ -1,7 +1,5 @@
 package com.example.message_service.listener;
 
-import java.util.Map;
-
 import com.example.message_service.dto.WebSocketSessionDTO;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,8 +11,6 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 import com.example.message_service.dto.RoomMember;
 import com.example.message_service.dto.RoomMessage;
 import com.example.message_service.dto.RoomMessageAction;
-import com.example.message_service.external.ExternalRoomService;
-import com.example.message_service.external.dto.NewMemberResponse;
 import com.example.message_service.publisher.RoomMessagePublisher;
 import com.example.message_service.websocket.manager.WebSocketSessionManager;
 
@@ -24,7 +20,7 @@ public class WebSocketListener {
     private final RoomMessagePublisher roomMessagePublisher;
     private final WebSocketSessionManager webSocketSessionManager;
 
-    public WebSocketListener(@Qualifier("simp") WebSocketSessionManager webSocketSessionManager,
+    public WebSocketListener(WebSocketSessionManager webSocketSessionManager,
             RoomMessagePublisher roomMessagePublisher) {
         this.webSocketSessionManager = webSocketSessionManager;
         this.roomMessagePublisher = roomMessagePublisher;

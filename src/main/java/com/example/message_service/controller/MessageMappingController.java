@@ -7,7 +7,7 @@ import org.springframework.stereotype.Controller;
 import com.example.message_service.dto.RoomMember;
 import com.example.message_service.dto.RoomMessage;
 import com.example.message_service.dto.RoomMessageAction;
-import com.example.message_service.external.dto.NewMemberResponse;
+import com.example.message_service.websocket.manager.WebSocketSessionManager;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -16,13 +16,19 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 @Controller
 public class MessageMappingController {
 
+    private final WebSocketSessionManager webSocketSessionManager;
+
+    public MessageMappingController(WebSocketSessionManager webSocketSessionManager) {
+        this.webSocketSessionManager = webSocketSessionManager;
+    }
+
     @MessageMapping("/{roomId}")
     public RoomMessage handleMessage(
             @Payload String messagePayload,
             @DestinationVariable String roomId,
             StompHeaderAccessor accessor) {
 
-        WebSocketSessionDTO websocketSession = (WebSocketSessionDTO) accessor.getSessionAttributes().get("user");
+        WebSocketSessionDTO authenticatedUser = webSocketSessionManager.getAuthenticatedUser(accessor);
 
         RoomMessage roomMessage = new RoomMessage();
 
@@ -30,10 +36,10 @@ public class MessageMappingController {
 
         RoomMember roomMember = new RoomMember();
 
-        roomMember.setUsername(websocketSession.getUsername());
-        roomMember.setUserId(websocketSession.getUserId());
-        roomMember.setMemberId(websocketSession.getMemberId());
-        roomMember.setProfilePicture(websocketSession.getProfilePicture());
+        roomMember.setUsername(authenticatedUser.getUsername());
+        roomMember.setUserId(authenticatedUser.getUserId());
+        roomMember.setMemberId(authenticatedUser.getMemberId());
+        roomMember.setProfilePicture(authenticatedUser.getProfilePicture());
 
         roomMessage.setSender(roomMember);
 

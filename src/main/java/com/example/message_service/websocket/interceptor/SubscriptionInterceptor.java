@@ -7,7 +7,6 @@ import com.example.message_service.dto.WebSocketSessionDTO;
 import com.example.message_service.publisher.RoomMessagePublisher;
 import com.example.message_service.websocket.manager.WebSocketSessionManager;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -21,7 +20,7 @@ public class SubscriptionInterceptor implements ChannelInterceptor {
     private final WebSocketSessionManager webSocketSessionManager;
     private final RoomMessagePublisher roomMessagePublisher;
 
-    public SubscriptionInterceptor(@Qualifier("simp") WebSocketSessionManager webSocketSessionManager,
+    public SubscriptionInterceptor(WebSocketSessionManager webSocketSessionManager,
             RoomMessagePublisher roomMessagePublisher) {
         this.webSocketSessionManager = webSocketSessionManager;
         this.roomMessagePublisher = roomMessagePublisher;

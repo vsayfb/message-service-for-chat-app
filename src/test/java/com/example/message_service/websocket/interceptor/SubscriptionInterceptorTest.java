@@ -1,6 +1,7 @@
 package com.example.message_service.websocket.interceptor;
 
 import com.example.message_service.websocket.manager.SimpWebSocketSessionManager;
+import com.example.message_service.websocket.manager.WebSocketSessionManager;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SubscriptionInterceptorTest {
 
     @Mock
-    private SimpWebSocketSessionManager webSocketSessionManager;
+    private WebSocketSessionManager webSocketSessionManager;
 
     @Mock
     private Message<String> message;

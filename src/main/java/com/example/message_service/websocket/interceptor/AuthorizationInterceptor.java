@@ -17,7 +17,7 @@ public class AuthorizationInterceptor implements ChannelInterceptor {
 
     private final WebSocketSessionManager webSocketSessionManager;
 
-    public AuthorizationInterceptor(@Qualifier("simp") WebSocketSessionManager webSocketSessionManager) {
+    public AuthorizationInterceptor(WebSocketSessionManager webSocketSessionManager) {
         this.webSocketSessionManager = webSocketSessionManager;
     }
 
