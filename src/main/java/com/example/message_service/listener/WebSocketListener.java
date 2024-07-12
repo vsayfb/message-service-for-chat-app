@@ -2,7 +2,6 @@ package com.example.message_service.listener;
 
 import com.example.message_service.dto.WebSocketSessionDTO;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
@@ -31,21 +30,20 @@ public class WebSocketListener {
 
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
 
-        WebSocketSessionDTO websocketSession = webSocketSessionManager.getAuthenticatedUser(accessor);
+        if (webSocketSessionManager.isAuthenticated(accessor)) {
 
-        try {
-            webSocketSessionManager.remove(accessor);
+            WebSocketSessionDTO authenticatedUser = webSocketSessionManager.getAuthenticatedUser(accessor);
 
             RoomMessage roomMessage = new RoomMessage();
 
-            roomMessage.setDestination("/topic/" + websocketSession.getRoomId());
+            roomMessage.setDestination("/topic/" + authenticatedUser.getRoomId());
 
             RoomMember roomMember = new RoomMember();
 
-            roomMember.setMemberId(websocketSession.getMemberId());
-            roomMember.setUserId(websocketSession.getUserId());
-            roomMember.setUsername(websocketSession.getUsername());
-            roomMember.setProfilePicture(websocketSession.getProfilePicture());
+            roomMember.setMemberId(authenticatedUser.getMemberId());
+            roomMember.setUserId(authenticatedUser.getUserId());
+            roomMember.setUsername(authenticatedUser.getUsername());
+            roomMember.setProfilePicture(authenticatedUser.getProfilePicture());
 
             RoomMessageAction<RoomMember> messageAction = new RoomMessageAction<>();
 
@@ -55,8 +53,10 @@ public class WebSocketListener {
             roomMessage.setAction(messageAction);
 
             roomMessagePublisher.publish(roomMessage);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+
         }
+
+        webSocketSessionManager.remove(accessor);
+
     }
 }
