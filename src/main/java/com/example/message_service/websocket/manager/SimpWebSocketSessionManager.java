@@ -61,10 +61,15 @@ public class SimpWebSocketSessionManager implements WebSocketSessionManager {
 
         WebSocketSessionDTO sessionDTO = getAuthenticatedUser(accessor);
 
-        if (sessionDTO != null) {
-            externalRoomService.removeMember(sessionDTO.getMemberId(), accessor.getSessionId());
+        if (isAuthenticated(accessor)) {
+            try {
+                externalRoomService.removeMember(sessionDTO.getMemberId(), accessor.getSessionId());
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
 
+        accessor.getSessionAttributes().remove("user");
     }
 
     @Override
