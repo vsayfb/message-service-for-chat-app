@@ -26,12 +26,12 @@ import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
+import org.springframework.messaging.simp.stomp.StompSession.Subscription;
 
 import com.example.message_service.dto.RoomMessage;
 import com.example.message_service.dto.RoomMessageAction;
 import com.example.message_service.external.ExternalRoomService;
 import com.example.message_service.external.dto.NewMemberResponse;
-import com.example.message_service.helper.JWTHelper;
 import com.example.message_service.helper.WebSocketHelper;
 import com.example.message_service.jwt.claims.JWTClaims;
 
@@ -61,9 +61,9 @@ public class PublishingLeaveMessageE2ETest {
 
         NewMemberResponse[] members = addMembers(10, roomId);
 
-        StompSession[] stompSessions = new StompSession[10];
+        Subscription[] subscriptions = new Subscription[10];
 
-        for (int i = 0; i < stompSessions.length - 1; i++) {
+        for (int i = 0; i < subscriptions.length; i++) {
 
             when(externalRoomService.addNewMember(any(JWTClaims.class), eq(roomId), anyString()))
                     .thenAnswer(new Answer<NewMemberResponse>() {
@@ -74,7 +74,7 @@ public class PublishingLeaveMessageE2ETest {
                         }
                     });
 
-            stompSessions[i] = webSocketHelper.subscribeRoom(members[i], "rooms", destination, port);
+            subscriptions[i] = webSocketHelper.subscribeTopic(members[i], "rooms", destination, port);
 
         }
 
@@ -82,7 +82,7 @@ public class PublishingLeaveMessageE2ETest {
 
         CountDownLatch latch = new CountDownLatch(9);
 
-        session.subscribe(destination, new StompFrameHandler() {
+        var subscription = session.subscribe(destination, new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return RoomMessage.class;
@@ -99,18 +99,17 @@ public class PublishingLeaveMessageE2ETest {
             }
         });
 
-        for (int i = 0; i < stompSessions.length - 1; i++) {
-
-            assertTrue(stompSessions[i].isConnected());
-
-            stompSessions[i].disconnect();
+        for (int i = 0; i < subscriptions.length; i++) {
+            subscriptions[i].unsubscribe();
         }
 
         boolean allPublished = latch.await(5, TimeUnit.SECONDS);
 
-        assertTrue(latch.getCount() == 0);
+        assertEquals(latch.getCount(), 0);
 
         assertTrue(allPublished);
+
+        subscription.unsubscribe();
     }
 
     private NewMemberResponse[] addMembers(int length, String roomId) {

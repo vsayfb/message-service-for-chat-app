@@ -10,6 +10,7 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandler;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
+import org.springframework.messaging.simp.stomp.StompSession.Subscription;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.client.WebSocketClient;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
@@ -85,6 +86,37 @@ public class WebSocketHelper {
         });
 
         return stompSession;
+    }
+
+    public Subscription subscribeTopic(NewMemberResponse member, String endpoint, String destination, int port)
+            throws UnknownHostException, ExecutionException, InterruptedException {
+
+        jwtHelper.setUserId(member.getId());
+        jwtHelper.setUsername(generateRandomString());
+
+        String token = jwtHelper.sign();
+
+        StompSession stompSession = connect(endpoint, port);
+
+        StompHeaders headers = new StompHeaders();
+
+        headers.setDestination(destination);
+
+        headers.add("Authorization", "Bearer " + token);
+
+        var subscription = stompSession.subscribe(headers, new StompFrameHandler() {
+
+            @Override
+            public Type getPayloadType(StompHeaders headers) {
+                return null;
+            }
+
+            @Override
+            public void handleFrame(StompHeaders headers, Object payload) {
+            }
+        });
+
+        return subscription;
     }
 
     private String generateRandomString() {
