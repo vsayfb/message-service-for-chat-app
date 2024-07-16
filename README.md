@@ -2,15 +2,11 @@
 
 This microservice is part of the _[real-time chat application](https://github.com/vsayfb/real-time-chat-application)._
 
----
-
 ### Description
 
 This microservice provides a WebSocket endpoint for users to join chat rooms and send messages.
 
 The WebSocket connection endpoint exposed at _ws://api-gateway/websocket/_ .
-
----
 
 ### Subscribing To Topics
 
@@ -35,8 +31,6 @@ To unsubscribe from a topic, an **UNSUBSCRIBE** frame must be sent. Once the ser
 If the server does not receive the **UNSUBSCRIBE** frame, the Spring Boot [SessionDisconnectHandler](<[https://](https://github.com/vsayfb/message-service-for-chat-app/blob/master/src/main/java/com/example/message_service/listener/WebSocketListener.java)>) can detect the disconnection and delete the member from the chat room.
 
 If the event listener fails to handle WebSocket disconnections, members may remain in the chat room indefinitely. Implementing a heartbeat mechanism could solve this problem, but currently, such a feature is not available.
-
----
 
 ### Sending Messages To Topics
 
