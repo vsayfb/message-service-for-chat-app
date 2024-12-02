@@ -6,14 +6,14 @@ COPY src src
 COPY .mvn .mvn
 COPY pom.xml mvnw ./
 
-RUN --mount=type=cache,target=/root/.m2 \ 
+RUN --mount=type=cache,target=/root/.m2 \
     ./mvnw dependency:resolve
 
 FROM base AS test
 
 WORKDIR /app
 
-ENTRYPOINT [ "./mvnw", "test" ]
+ENTRYPOINT ["./mvnw", "test"]
 
 FROM base AS dev
 
@@ -30,7 +30,7 @@ COPY pom.xml mvnw ./
 COPY src src
 
 RUN --mount=type=cache,target=/root/.m2 \
-    ./mvnw clean package -DskipTests
+    ./mvnw clean package -DskipTests -Pproduction
 
 RUN $JAVA_HOME/bin/jlink \
     --module-path $JAVA_HOME/jmods \
@@ -45,11 +45,11 @@ FROM alpine:latest AS prod
 WORKDIR /src
 
 ENV JAVA_HOME=/opt/java
-
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 COPY --from=builder /jre $JAVA_HOME
 
 COPY --from=builder /build/target/*.jar /src/app.jar
 
-ENTRYPOINT ["java", "-jar", "app.jar","--spring.profiles.active=production"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.profiles.active=production"]
+
